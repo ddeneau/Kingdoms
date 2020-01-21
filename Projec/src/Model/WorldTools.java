@@ -36,9 +36,9 @@ public class WorldTools {
 	protected final static ImagePattern MOUNTAIN = new ImagePattern(MTN_IMG);
 	protected final static ImagePattern WATER = new ImagePattern(WATER_IMG);
 	private static boolean lakeGenerator = false;
-	private static int lakeGenInt = 10;
+	private static int lakeGenInt = 15;
 	private static boolean coastGenerator = false;
-	private static int coastGenInt = 25;
+	private static int coastGenInt = 20;
 	
 	
 	
