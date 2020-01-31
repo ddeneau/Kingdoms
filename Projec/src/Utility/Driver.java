@@ -80,6 +80,9 @@ public class Driver extends Application {
 		sizeSlider.valueProperty().addListener(e -> {
 			size = (int) sizeSlider.getValue();
 			
+			if(size == 0) {
+				size = 5;
+			}
 		});
 		
 		startButton.setOnAction(e -> {
@@ -93,7 +96,7 @@ public class Driver extends Application {
 				e1.printStackTrace();
 			}
 		});
-	
+;	
 	}
 
 }

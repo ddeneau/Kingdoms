@@ -22,23 +22,21 @@ import javafx.stage.Stage;
  * 
  * - missing "wildness" field.  */
 public class World extends Application implements Runnable {
-	private static int tileSize, tileMaxWidth, tileMaxHeight, tileDivHor, tileDivVer;
-	ArrayList<ArrayList<Rectangle>> background; // 2D Array of "tiles"
-	HashMap<Rectangle, Kingdom> kingdomMap; // Map of rectangle nodes to coordinates.
-	public HashMap<Rectangle, int[]> nodeMap; // Graphical Component-to-location map
-	HashMap<String, int[]> coordinatesMap; // Name-to-location map. 
-	HashMap<String, Kingdom> kingdoms; // Name-to-Kingdom map. 
-	int width, height, turn, wealth; // variables for the world. 
-	Stage world; // Main JavaFX stage for world. 
-	String worldName = "New World"; // Stage Name. 
-	Pane worldPane; // Main pane. 
-	TextField turnText, cityText, coordinatesText; // Texts fields. 
-	GridPane controls, innerControls, backgroundPane; // Control pane objects and background for graphics pane.
-	Button nodeButton,turnButton, roadButton, auxRoadButton; // Buttons. 
-	Rectangle src, dst; // Used for road building. 
-	int[] coordinates;
-	Rectangle selectedNode;
-	int sizeFactor;
+	private static int tileSize, tileMaxWidth, tileMaxHeight, tileDivHor, tileDivVer; // tile settings. 
+	private ArrayList<ArrayList<Rectangle>> background; // 2D Array of "tiles"
+	private HashMap<Rectangle, Kingdom> kingdomMap; // Map of rectangle nodes to coordinates.
+	private HashMap<Rectangle, int[]> nodeMap; // Graphical Component-to-location map
+	private HashMap<String, int[]> coordinatesMap; // Name-to-location map. 
+	private HashMap<String, Kingdom> kingdoms; // Name-to-Kingdom map. 
+	private int width, height, turn, wealth; // variables for the world. 
+	private Pane worldPane; // Main pane. 
+	private TextField turnText, cityText, coordinatesText; // Texts fields. 
+	private GridPane controls, innerControls, backgroundPane; // Control pane objects and background for graphics pane.
+	private Button nodeButton,turnButton, roadButton, auxRoadButton; // Buttons. 
+	private Rectangle src, dst; // Used for road building. 
+	private int[] coordinates; // auxiliary array for use in adding cities. 
+	private Rectangle selectedNode; //
+	private int sizeFactor;
 	
 	/* Constructor. */
 	public World(int width, int height, int size) throws Exception {
@@ -73,14 +71,14 @@ public class World extends Application implements Runnable {
 		tileDivVer = 9 * sizeFactor;
 	}
 
-	/* Adds a new node to the map. */
+	/* Adds a new city to the map. */
 	private void addNode() {
 		Rectangle node = new Rectangle();
 		String name = WorldTools.getKingdomName();
 		Kingdom kingdom = new Kingdom(name);
 		Text nodeName = new Text(name);
 		int[] xy = new int[2];
-		
+
 		for(int i = 0; i < xy.length; i++) {
 			xy[i] = (coordinates[i]);
 		}
@@ -88,6 +86,14 @@ public class World extends Application implements Runnable {
 		if(!(WorldTools.checkNeighbors(kingdomMap, coordinates, nodeMap))) {
 			return;
 		}
+		
+		if(xy[1] < 10 || xy[0] < 10) {
+			return;
+		} else if(xy[1] > tileMaxHeight || xy[0] > tileMaxWidth) {
+			return;
+		}
+		
+		wealth -= 10;
 		
 		/* Adds entry to kingdomMap. */
 		kingdomMap.put(node, kingdom); 
@@ -161,7 +167,6 @@ public class World extends Application implements Runnable {
 		world.setScene(scene);
 		world.show();
 		world.setResizable(false);
-		this.world = world;
 	}
 	
 	@Override
@@ -209,7 +214,6 @@ public class World extends Application implements Runnable {
 				return;
 			} else {
 				addNode();
-				wealth -= 100;
 			}
 		});
 		
@@ -333,7 +337,7 @@ public class World extends Application implements Runnable {
 		wealth -= WorldTools.getEuclideanDistance(coordinatesMap.get(source), coordinatesMap.get(dest));
 	}
 	
-	private void constructRoadTile(int index, double constant) {
+	private void constructRoadTile(int index, int constant, boolean vertical) {
 		Rectangle roadTile = new Rectangle();
 		roadTile.setFill(WorldTools.ROAD);
 		roadTile.setWidth(tileSize);
@@ -342,31 +346,36 @@ public class World extends Application implements Runnable {
 		
 		backgroundPane.getChildren().add(roadTile);
 		
-
-		roadTile.setTranslateX(index);
-		roadTile.setTranslateY(constant);
+		if(vertical) {
+			roadTile.setTranslateY(index);
+			roadTile.setTranslateX(constant);
+		} else {
+			roadTile.setTranslateX(index);
+			roadTile.setTranslateY(constant);
+		}
 		
 	}
 	
 	private void drawRoad(int sourceX, int sourceY, int destX, int destY) {
-		
+		// Road goes from source to destination, or in opposite direction based on which one comes first on x-axis
 		if(destX < sourceX) {
-			for(int index = destX; index < sourceX; index++) {
-				constructRoadTile(index, sourceX);
+			for(int index = destX; index <= sourceX; index++) {
+				constructRoadTile(index, sourceX, false);
 			}
-		} else {
-			for(int index = sourceX - 1; index < destX + 1; index++) {
-				constructRoadTile(index, sourceX);
+		} else if (destX > sourceX) {
+			for(int index = sourceX; index < destX; index++) {
+				constructRoadTile(index, sourceX, false);
 			}
 		}
 		
+		// Same concept as above, based on y-axis. 
 		if(destY < sourceY) {
-			for(int index = destY; index < sourceY ; index++) {
-				constructRoadTile(sourceX, index);
+			for(int index = destY; index <= sourceY ; index++) {
+				constructRoadTile(index, destY, true);
 			}
-		} else {
-			for(int index = sourceY; index < destY ; index++) {
-				constructRoadTile(sourceX, index);
+		} else if(destY > sourceY){
+			for(int index = sourceY; index <= destY ; index++) {
+				constructRoadTile(index, destY, true);
 			}
 		}
 	
