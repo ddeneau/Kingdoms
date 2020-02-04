@@ -169,15 +169,14 @@ public class World extends Application implements Runnable {
 		world.setResizable(false);
 	}
 	
-	@Override
+	@Override	/* JavaFX method for starting application. Calls run() to initiate the world. */
 	public void start(Stage world) throws Exception {
 		setWithColor(world, Color.AQUA);
 		run();
 	}
 
-	@Override
+	@Override	/* Starts world. */
 	public void run() {
-		
 		updateControlListeners();
 		updateKingdomListeners();
 	}
@@ -256,6 +255,7 @@ public class World extends Application implements Runnable {
 		
 	}
 	
+	/* Maintains consistency between controls and graphics.  */
 	private void updateKingdomListeners() {
 		if(sizeFactor == 1) {
 			sizeFactor = sizeFactor * 10;
@@ -294,6 +294,7 @@ public class World extends Application implements Runnable {
 	
 	}
 	
+	/* Updates control panel for road city selection.  */
 	private void addRoad() {
 		disableKingdomViewers();
 		cityText.setText("Click Source");
@@ -309,6 +310,7 @@ public class World extends Application implements Runnable {
 		});	
 	}
 	
+	/* Updates control panel for road confirmation.  */
 	private void finishAddRoad() {
 			dst = selectedNode;
 			roadButton.setText("Construct");
@@ -319,14 +321,9 @@ public class World extends Application implements Runnable {
 			});
 	}
 	
+	/* Technical checks and state changes before beginning construction of a road. */
 	private void constructRoad() {
-		String source  = "";
-		String dest = "";
-		
-		source =kingdomMap.get(src).getName();
-		dest =kingdomMap.get(dst).getName();
-		
-		if(kingdoms.keySet().contains(source) && kingdoms.keySet().contains(dest)) {
+		if(nodeMap.keySet().contains(src) && nodeMap.keySet().contains(dst)) {
 	
 			drawRoad(nodeMap.get(src)[1], nodeMap.get(src)[0], nodeMap.get(dst)[1], nodeMap.get(dst)[0]);	
 		} else {
@@ -334,9 +331,10 @@ public class World extends Application implements Runnable {
 		}
 		
 		cityText.setText("Road Created");
-		wealth -= WorldTools.getEuclideanDistance(coordinatesMap.get(source), coordinatesMap.get(dest));
+		wealth -= WorldTools.getEuclideanDistance(nodeMap.get(src), nodeMap.get(dst));
 	}
 	
+	/* Graphically adds a road tile image to the world.  */
 	private void constructRoadTile(int index, int constant, boolean vertical) {
 		Rectangle roadTile = new Rectangle();
 		roadTile.setFill(WorldTools.ROAD);
@@ -356,31 +354,22 @@ public class World extends Application implements Runnable {
 		
 	}
 	
+	/* Repeats the drawing of a road tile between two given cities. */
 	private void drawRoad(int sourceX, int sourceY, int destX, int destY) {
-		// Road goes from source to destination, or in opposite direction based on which one comes first on x-axis
-		if(destX < sourceX) {
-			for(int index = destX; index <= sourceX; index++) {
-				constructRoadTile(index, sourceX, false);
-			}
-		} else if (destX > sourceX) {
-			for(int index = sourceX; index < destX; index++) {
-				constructRoadTile(index, sourceX, false);
-			}
+		int stop_x = Math.max(sourceX, destX), start_x = Math.min(sourceX, destX);
+		int stop_y = Math.max(sourceY, destY), start_y = Math.min(sourceY, destY);
+			
+		for(int index = start_x; index <= stop_x; index++) {
+				constructRoadTile(index, sourceY, false);
 		}
-		
-		// Same concept as above, based on y-axis. 
-		if(destY < sourceY) {
-			for(int index = destY; index <= sourceY ; index++) {
-				constructRoadTile(index, destY, true);
-			}
-		} else if(destY > sourceY){
-			for(int index = sourceY; index <= destY ; index++) {
-				constructRoadTile(index, destY, true);
-			}
+			
+				
+		for(int index = start_y; index <= stop_y; index++) {
+			constructRoadTile(index, sourceY, true);
 		}
-	
 	}
 	
+	/* Prevents city windows from opening upon clicking cities. */
 	private void disableKingdomViewers() {
 		for(Rectangle circle : nodeMap.keySet()) {
 			circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
