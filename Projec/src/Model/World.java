@@ -359,12 +359,12 @@ public class World extends Application implements Runnable {
 		int stop_x = Math.max(sourceX, destX), start_x = Math.min(sourceX, destX);
 		int stop_y = Math.max(sourceY, destY), start_y = Math.min(sourceY, destY);
 			
-		for(int index = start_x; index <= stop_x; index++) {
+		for(int index = start_x - 1; index < stop_x; index++) {
 				constructRoadTile(index, sourceY, false);
 		}
 			
 				
-		for(int index = start_y; index <= stop_y; index++) {
+		for(int index = start_y - 1; index < stop_y; index++) {
 			constructRoadTile(index, sourceY, true);
 		}
 	}
