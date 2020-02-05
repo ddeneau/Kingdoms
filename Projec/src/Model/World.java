@@ -3,6 +3,8 @@ package Model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
+
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -358,14 +360,23 @@ public class World extends Application implements Runnable {
 	private void drawRoad(int sourceX, int sourceY, int destX, int destY) {
 		int stop_x = Math.max(sourceX, destX), start_x = Math.min(sourceX, destX);
 		int stop_y = Math.max(sourceY, destY), start_y = Math.min(sourceY, destY);
+		int constant_horizontal = sourceY, constant_vertical = destX;
+		Random random = new Random();
+		int direction = random.nextInt(1);
+		
+		if(direction == 1) {
+			constant_vertical = sourceX;
+			constant_horizontal = destY;
+		}
+		
 			
 		for(int index = start_x - 1; index < stop_x; index++) {
-				constructRoadTile(index, sourceY, false);
+				constructRoadTile(index, constant_horizontal, false);
 		}
 			
 				
 		for(int index = start_y - 1; index < stop_y; index++) {
-			constructRoadTile(index, sourceY, true);
+			constructRoadTile(index, constant_vertical, true);
 		}
 	}
 	
